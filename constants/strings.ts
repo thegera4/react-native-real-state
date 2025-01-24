@@ -11,7 +11,14 @@ const strings = {
   LOGIN: "Iniciar Sesión",
 
   // Home screen
+  home: {
 
+  },
+
+  // Profile screen
+  profile: {
+    LOGOUT: "Cerrar Sesión"
+  },
 
   // Placeholders
   placeholder: {
