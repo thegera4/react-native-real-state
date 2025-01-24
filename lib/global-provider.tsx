@@ -18,18 +18,28 @@ interface GlobalContextType {
 
 const GlobalContext = createContext<GlobalContextType | undefined>(undefined)
 
-export const GlobalProvider = ({ children }: { children: ReactNode}) => {
-  const { data: user, loading, refetch} = useAppwrite({
-    fn: getCurrentUser,
-    params: {},
-    skip: true
-  })
+interface GlobalProviderProps {
+  children: ReactNode
+}
+
+export const GlobalProvider = ({ children }: GlobalProviderProps) => {
+  const { data: user, loading, refetch: originalRefetch} = useAppwrite({ fn: getCurrentUser, })
 
   const isLoggedIn: boolean = !!user
-  console.log("User: ", JSON.stringify(user, null, 2))
+
+  const transformedUser: User | null = user ? {
+    $id: user.$id,
+    name: user.name,
+    email: user.email,
+    avatar: user.avatar
+  } : null
+
+  const refetch = (newParams?: Record<string, string | number>) => {
+    return originalRefetch(newParams || {})
+  }
 
   return (
-    <GlobalContext.Provider value={{isLoggedIn, user, loading, refetch}}>
+    <GlobalContext.Provider value={{isLoggedIn, user: transformedUser, loading, refetch}}>
       {children}
     </GlobalContext.Provider>
   )

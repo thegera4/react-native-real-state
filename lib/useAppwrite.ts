@@ -35,7 +35,7 @@ export const useAppwrite = <T, P extends Record<string, string | number>>({
       setError(null)
 
       try {
-        const result: Awaited<T> = await fn(fetchParams)
+        const result = await fn(fetchParams)
         setData(result)
       } catch (err: unknown) {
         const errorMessage: string = err instanceof Error ? err.message : "An unknown error occurred"

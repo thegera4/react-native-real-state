@@ -1,20 +1,26 @@
 import React, {useState} from 'react'
-import {Alert, View, Text, SafeAreaView, Image, TextInput, Platform, TouchableOpacity, Button} from 'react-native'
+import {Alert, View, Text, SafeAreaView, Image, TextInput, Platform, TouchableOpacity} from 'react-native'
 import images from '../constants/images'
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view'
 import SignButton from "@/components/SignButton"
-import strings from "@/constants/strings"
-import {createUser, loginWithEmailAndPassword} from "@/lib/appwrite";
+import strings, {HOME_URL} from "@/constants/strings"
+import {createUser, loginWithEmailAndPassword} from "@/lib/appwrite"
+import {useGlobalContext} from "@/lib/global-provider"
+import {Redirect} from "expo-router"
 
+// Styles
 const blueText = "text-2xl font-rubik-bold text-blue-600"
 const blackText = "text-2xl font-rubik-bold text-black-300 text-center"
 const inputStyle = "border border-gray-300 rounded-md p-2 mt-4"
 
+/** Screen to sign in or register a user */
 const SignIn = () => {
-
   const [type, setType] = useState<string>(strings.REGISTER)
   const [email, setEmail] = useState<string>("")
   const [password, setPassword] = useState<string>("")
+  const { refetch, loading, isLoggedIn } = useGlobalContext()
+
+  if (!loading && isLoggedIn) return <Redirect href={HOME_URL} />
 
   const handleSign = async (type: string, email: string, password: string) => {
     if (type === strings.REGISTER) {
@@ -33,6 +39,7 @@ const SignIn = () => {
         const userWasLogged: boolean = await loginWithEmailAndPassword(email, password)
         if (userWasLogged) {
           Alert.alert("Bienvenido", "Has iniciado sesión correctamente.")
+          await refetch()
         } else {
           Alert.alert("Error", "No se pudo iniciar sesión. Verifica tus credenciales o Cierra las sesiones abiertas.")
         }

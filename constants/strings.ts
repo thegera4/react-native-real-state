@@ -1,10 +1,17 @@
 /**Contains all strings values used in the application.*/
 const strings = {
 
+  // Bottom tab bar
+  HOME: "Inicio",
+  PROFILE: "Perfil",
+
   // Register/Log in screen
   REGISTER: "Register",
   REGISTRARSE: "Registrarse",
   LOGIN: "Iniciar Sesión",
+
+  // Home screen
+
 
   // Placeholders
   placeholder: {
@@ -18,3 +25,8 @@ const strings = {
 }
 
 export default strings
+
+// URLS
+export const HOME_URL = "/"
+export const SIGN_URL = "/sign-in"
+export const PROFILE_URL = "/profile"
