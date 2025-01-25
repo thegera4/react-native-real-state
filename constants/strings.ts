@@ -12,6 +12,7 @@ const strings = {
 
   // Home screen
   home: {
+    ALL: "All",
 
   },
 
