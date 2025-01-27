@@ -1,18 +1,28 @@
-import { Account, Avatars, Client } from "react-native-appwrite"
+import {Account, Avatars, Client, Databases, Query} from "react-native-appwrite"
 import * as Crypto from 'expo-crypto'
+import strings from "@/constants/strings";
 
 // Appwrite Configuration
-export const projectId: string | undefined = process.env.EXPO_PUBLIC_APPWRITE_PROJECT_ID
+export const config = {
+  endpoint: process.env.EXPO_PUBLIC_APPWRITE_ENDPOINT,
+  projectId: process.env.EXPO_PUBLIC_APPWRITE_PROJECT_ID,
+  databaseId: process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID,
+  galleriesCollectionId: process.env.EXPO_PUBLIC_APPWRITE_GALLERIES_COLLECTION_ID,
+  reviewsCollectionId: process.env.EXPO_PUBLIC_APPWRITE_REVIEWS_COLLECTION_ID,
+  agentsCollectionId: process.env.EXPO_PUBLIC_APPWRITE_AGENTS_COLLECTION_ID,
+  propertiesCollectionId: process.env.EXPO_PUBLIC_APPWRITE_PROPERTIES_COLLECTION_ID,
+}
 
 // Appwrite Client
 export const client = new Client()
 
 // Set the Appwrite Client configuration
-client.setProject(projectId!)
+client.setProject(config.projectId!)
 
 // Appwrite Services (to create avatars and accounts)
 export const avatar = new Avatars(client)
 export const account = new Account(client)
+export const databases = new Databases(client)
 
 /**
  * Function to create a new user.
@@ -76,4 +86,54 @@ export async function getCurrentUser(): Promise<Record<string, any> | undefined>
     console.error(error)
     return undefined
   }
+}
+
+/**
+ * Function to fetch the properties from the database.
+ * @returns {Promise<Record<string, any>[]>} - Returns an array of properties or an empty array if no properties are found.
+ */
+export async function getLatestProperties(): Promise<Record<string, any>[]> {
+  try {
+    const result = await databases.listDocuments(
+      config.databaseId!,
+      config.propertiesCollectionId!,
+      [Query.orderAsc("$createdAt"), Query.limit(5)]
+    )
+    return result.documents
+  } catch (error) {
+    console.error(error)
+    return []
+  }
+}
+
+export async function getProperties({ filter, query, limit }: { filter: string, query: string, limit: number }): Promise<Record<string, any>[]> {
+  try {
+    // First we prepare the query according to the filter, query and limit parameters
+    const buildQuery = [Query.orderDesc("$createdAt")]
+    if (filter && filter !== strings.home.ALL) {
+      buildQuery.push(Query.equal("type", filter))
+    }
+    if (query) {
+      buildQuery.push(Query.or([
+        Query.search("name", query),
+        Query.search("address", query),
+        Query.search("type", query),
+      ]))
+    }
+    if (limit) {
+      buildQuery.push(Query.limit(limit))
+    }
+
+    // After the query is built, we fetch the properties from the database
+    const result = await databases.listDocuments(
+      config.databaseId!,
+      config.propertiesCollectionId!,
+      buildQuery
+    )
+    return result.documents
+  } catch (error) {
+    console.error(error)
+    return []
+  }
+
 }
