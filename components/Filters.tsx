@@ -2,7 +2,7 @@ import {Text, ScrollView, Pressable} from 'react-native'
 import React, {useState} from 'react'
 import strings from "@/constants/strings"
 import {router, useLocalSearchParams} from "expo-router"
-import {categories} from "@/constants/data";
+import {categories} from "@/constants/data"
 
 const Filters = () => {
   const params: {filter?: string | undefined} = useLocalSearchParams<{filter?: string}>()

@@ -1,5 +1,5 @@
 import {useEffect} from "react"
-import {FlatList, Image, SafeAreaView, Text, TouchableOpacity, View} from 'react-native'
+import {ActivityIndicator, FlatList, Image, SafeAreaView, Text, TouchableOpacity, View} from 'react-native'
 import icons from "@/constants/icons"
 import Search from "@/components/Search"
 import {Card, FeaturedCard} from "@/components/Cards"
@@ -8,7 +8,9 @@ import {useGlobalContext} from "@/lib/global-provider"
 import {router, useLocalSearchParams} from "expo-router"
 import {useAppwrite} from "@/lib/useAppwrite"
 import {getLatestProperties, getProperties} from "@/lib/appwrite"
+import NoResults from "@/components/NoResults"
 
+// noinspection JSUnusedGlobalSymbols
 export default function Index() {
   const { user } = useGlobalContext()
   const uri: string | undefined = user?.avatar.toString()
@@ -48,11 +50,12 @@ export default function Index() {
       <FlatList
         data={properties}
         renderItem={({item}) => <Card item={item} onPress={() => handleCardPress(item.$id)}/>}
-        keyExtractor={(item) => item.toString()}
+        keyExtractor={(item) => item.$id}
         numColumns={2}
         contentContainerClassName="pb-32"
         columnWrapperClassName="flex gap-5 px-5"
         showsVerticalScrollIndicator={false}
+        ListEmptyComponent={loading ? <ActivityIndicator size="large" className="text-primary-100 mt-5"/> : <NoResults/>}
         ListHeaderComponent={
           <View className="px-5">
             {/* Top bar (avatar, name and notifications icon) */}
@@ -73,25 +76,28 @@ export default function Index() {
               <View className="flex flex-row items-center justify-between">
                 <Text className="text-xl font-rubik-bold text-black-300">Destacadas</Text>
                 <TouchableOpacity>
-                  <Text className="text-base font-rubik-bold text-blue-600">Ver todo</Text>
+                  <Text className="text-base font-rubik-bold text-blue-600">Ver todas</Text>
                 </TouchableOpacity>
               </View>
               {/* Featured cards */}
-              <FlatList
-                bounces={false}
-                data={latestProperties}
-                keyExtractor={(item) => item.toString()}
-                horizontal={true}
-                showsHorizontalScrollIndicator={false}
-                contentContainerClassName="flex gap-5 mt-5"
-                renderItem={({item}) => <FeaturedCard item={item} onPress={() => handleCardPress(item.$id)} />}
-              />
+              {latestPropertiesLoading ? (<ActivityIndicator size="large" className="text-primary-100"/>) :
+                !latestProperties || latestProperties.length === 0 ? <NoResults /> : (
+                  <FlatList
+                      bounces={false}
+                      data={latestProperties}
+                      keyExtractor={(item) => item.$id}
+                      horizontal={true}
+                      showsHorizontalScrollIndicator={false}
+                      contentContainerClassName="flex gap-5 mt-5"
+                      renderItem={({item}) => <FeaturedCard item={item} onPress={() => handleCardPress(item.$id)} />}
+                  />
+                  )}
             </View>
             {/* Recommended and see all texts */}
             <View className="flex flex-row items-center justify-between">
               <Text className="text-xl font-rubik-bold text-black-300">Recomendadas</Text>
               <TouchableOpacity>
-                <Text className="text-base font-rubik-bold text-blue-600">Ver todo</Text>
+                <Text className="text-base font-rubik-bold text-blue-600">Ver todas</Text>
               </TouchableOpacity>
             </View>
             {/* Filters */}

@@ -12,7 +12,7 @@ const strings = {
 
   // Home screen
   home: {
-    ALL: "All",
+    ALL: "Todas",
 
   },
 

@@ -1,6 +1,7 @@
 import {Account, Avatars, Client, Databases, Query} from "react-native-appwrite"
 import * as Crypto from 'expo-crypto'
-import strings from "@/constants/strings";
+import strings from "@/constants/strings"
+import {Models} from "react-native-appwrite"
 
 // Appwrite Configuration
 export const config = {
@@ -30,16 +31,16 @@ export const databases = new Databases(client)
  * @param {string} password - The password of the user.
  * @returns {Promise<boolean>} - Returns a boolean value to indicate if the user was created or not.
  */
-  export async function createUser(email: string, password: string): Promise<boolean> {
-    try {
-      const uuid: string = Crypto.randomUUID()
-      await account.create(uuid, email, password)
-      return true
-    } catch (error) {
-      console.error("Failed to create user: " + error)
-      return false
-    }
+export async function createUser(email: string, password: string): Promise<boolean> {
+  try {
+    const uuid: string = Crypto.randomUUID()
+    await account.create(uuid, email, password)
+    return true
+  } catch (error) {
+    console.error("Failed to create user: " + error)
+    return false
   }
+}
 
 /**
  * Function to log in with email and password.
@@ -77,7 +78,7 @@ export async function logout(): Promise<boolean> {
  */
 export async function getCurrentUser(): Promise<Record<string, any> | undefined> {
   try {
-    const response= await account.get()
+    const response: Models.User<Models.Preferences> = await account.get()
     if(response.$id) {
       const userAvatar: URL = avatar.getInitials(response.name || "N/A")
       return { ...response, avatar: userAvatar }
@@ -92,9 +93,9 @@ export async function getCurrentUser(): Promise<Record<string, any> | undefined>
  * Function to fetch the properties from the database.
  * @returns {Promise<Record<string, any>[]>} - Returns an array of properties or an empty array if no properties are found.
  */
-export async function getLatestProperties(): Promise<Record<string, any>[]> {
+export async function getLatestProperties(): Promise<Models.Document[]> {
   try {
-    const result = await databases.listDocuments(
+    const result: Models.DocumentList<Models.Document> = await databases.listDocuments(
       config.databaseId!,
       config.propertiesCollectionId!,
       [Query.orderAsc("$createdAt"), Query.limit(5)]
@@ -106,10 +107,17 @@ export async function getLatestProperties(): Promise<Record<string, any>[]> {
   }
 }
 
-export async function getProperties({ filter, query, limit }: { filter: string, query: string, limit: number }): Promise<Record<string, any>[]> {
+/**
+ * Function to fetch the properties from the database.
+ * @param {string} filter - The filter to apply to the query.
+ * @param query
+ * @param limit
+ * @returns {Promise<Models.Document[]>} - Returns an array of properties or an empty array if no properties are found.
+ */
+export async function getProperties({ filter, query, limit }: { filter: string, query: string, limit: number }): Promise<Models.Document[]> {
   try {
     // First we prepare the query according to the filter, query and limit parameters
-    const buildQuery = [Query.orderDesc("$createdAt")]
+    const buildQuery: string[] = [Query.orderDesc("$createdAt")]
     if (filter && filter !== strings.home.ALL) {
       buildQuery.push(Query.equal("type", filter))
     }
@@ -125,7 +133,7 @@ export async function getProperties({ filter, query, limit }: { filter: string, 
     }
 
     // After the query is built, we fetch the properties from the database
-    const result = await databases.listDocuments(
+    const result: Models.DocumentList<Models.Document> = await databases.listDocuments(
       config.databaseId!,
       config.propertiesCollectionId!,
       buildQuery
@@ -135,5 +143,4 @@ export async function getProperties({ filter, query, limit }: { filter: string, 
     console.error(error)
     return []
   }
-
 }
