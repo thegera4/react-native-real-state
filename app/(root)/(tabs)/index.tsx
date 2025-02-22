@@ -18,15 +18,13 @@ export default function Index() {
 
   const params = useLocalSearchParams<{ query?: string, filter?: string; }>()
 
+  // Fetch latest properties on component mount
   const { data: latestProperties, loading: latestPropertiesLoading } = useAppwrite({ fn: getLatestProperties, })
 
+  // Fetch properties on component mount
   const { data: properties, loading, refetch } = useAppwrite({
     fn: getProperties,
-    params: {
-      filter: params.filter!,
-      query: params.query!,
-      limit: 6
-    },
+    params: { filter: params.filter!, query: params.query!, limit: 6 },
     skip: true,
   })
 
@@ -43,7 +41,7 @@ export default function Index() {
    * Function to handle the card press and navigate to the property details screen.
    * @param {string} id - The property id.
    */
-  const handleCardPress = (id: string) => router.push(`/properties/${id}`)
+  const handleCardPress: (id: string) => void = (id: string) => router.push(`/properties/${id}`)
 
   return (
     <SafeAreaView className="bg-white h-full">
